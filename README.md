@@ -1,50 +1,20 @@
-# test-manager-library-3145555-infra
+# Manager Library Local Infrastructure
 
-> **Prueba técnica · Ficha ADSO 3145555**
-> Horario: **miércoles 14 de octubre de 2026, de 6:50 a. m. a 11:00 a. m.** (hora Colombia). Entrega a las **11:00 a. m.**
+This repository contains the local service composition only. PostgreSQL starts **empty**; Laravel business migrations run only when explicitly requested. The frontend, API, public website, and demo seeder remain in their respective repositories.
 
-Este repositorio es la **infraestructura** de *Manager Library*: contenedores, red, volúmenes y el motor de base de datos vacío. **Empieza vacío a propósito**: se construye en el fork de cada aprendiz.
+## Requirements and setup
 
-## Instrucciones
+Install Docker Desktop with Docker Compose v2. Clone all six repositories as sibling directories under the same parent directory.
 
-Cada aprendiz debe **crear el fork** de los seis repositorios del proyecto y **resolver el proyecto
-con el spec planteado**.
+1. Copy this repository's `.env.example` to `.env`. Example values are for local development only.
+2. Copy `test-manager-library-3145555-api/.env.example` to `test-manager-library-3145555-api/.env`.
+3. In the API `.env`, set a random `JWT_SECRET` with at least 32 characters and configure `ADMIN_USERNAME` and `ADMIN_PASSWORD`. Do not commit these values.
+4. Generate Laravel's key, which is persisted in the mounted API `.env`: `docker compose run --build --rm api php artisan key:generate --force`.
+5. From this repository directory, run `docker compose up --build`.
+6. The API is available at `http://localhost:8000`, the React app at `http://localhost:5173`, and the public website at `http://localhost:8080`. PostgreSQL does not publish a host port.
+7. Create the six business tables and categories with `docker compose exec api php artisan migrate --force`. The Laravel HTTP application provisions the administrator from environment credentials after migration.
+8. To load fictional demo records, run `docker compose --profile seed run --rm seed`. This writes through the API; it cannot create overdue loans because the current contract does not allow setting a due date in the past.
 
-1. Hacer fork, a su cuenta de GitHub, de cada repositorio de la tabla del final.
-2. Leer el spec en [`test-manager-library-3145555-docs`](https://github.com/code-sena/test-manager-library-3145555-docs).
-   Se entrega en dos versiones: `spec-python/` y `spec-.net/`.
-3. Desarrollar en los forks.
+The `db` service uses a persistent volume. To intentionally reset the local database, stop the stack and remove that volume with `docker compose down -v`. This permanently deletes local database data.
 
-## El reto se desarrolla con React y PHP (Laravel)
-
-El spec está escrito para Python y para .NET, pero el reto **no** se hace en esos lenguajes:
-
-| Capa | Tecnología del reto |
-|---|---|
-| Frontend | React |
-| Backend | PHP con Laravel |
-
-Lo que el spec define sobre el negocio —historias, criterios de aceptación, reglas, contrato de la
-API, modelo de datos— se respeta. Lo que define sobre la tecnología se traduce a React y Laravel.
-
-## La prueba no consiste en escribir el código
-
-El propósito principal es ver la **capacidad de desempeño con SDD** (*Spec-Driven Development*,
-desarrollo guiado por especificación): cómo se lee, se interpreta y se aplica una especificación
-para llevarla a un stack distinto. El código es el medio, no el fin.
-
-## Entrega
-
-Cuenta lo que quede **subido a los forks antes de las 11:00 a. m.** Lo que llegue después no se revisa.
-No hay prórroga: suban avances parciales con commits pequeños durante la prueba.
-
-## Los seis repositorios
-
-| Repositorio | Qué va ahí |
-|---|---|
-| [`test-manager-library-3145555-docs`](https://github.com/code-sena/test-manager-library-3145555-docs) | El spec: `spec-python/` y `spec-.net/` |
-| [`test-manager-library-3145555-api`](https://github.com/code-sena/test-manager-library-3145555-api) | Backend en PHP (Laravel) |
-| [`test-manager-library-3145555-app`](https://github.com/code-sena/test-manager-library-3145555-app) | Frontend en React |
-| [`test-manager-library-3145555-page`](https://github.com/code-sena/test-manager-library-3145555-page) | Sitio público estático de presentación |
-| [`test-manager-library-3145555-infra`](https://github.com/code-sena/test-manager-library-3145555-infra) | Contenedores, red, volúmenes y motor de base de datos vacío |
-| [`test-manager-library-3145555-tool`](https://github.com/code-sena/test-manager-library-3145555-tool) | Utilidades: sembrador de datos de demostración |
+PostgreSQL is not exposed on a host port. Replace all example credentials before using any shared or public environment.
